@@ -1,6 +1,7 @@
 <script setup>
 import {onMounted, ref, watch} from 'vue'
 import {useConvertStore} from "../../stores/convert.js";
+import {ElMessage} from "element-plus";
 const convert = useConvertStore()
 const correlationCurrency = ref(1)
 const currencyValue1 = ref(1)
@@ -23,20 +24,36 @@ watch(currencyName2, (newval, oldval) => {
   currencyValue2.value =  (currencyValue1.value * correlationCurrency.value).toFixed(2)
 })
 function changeCurrency1(val){
-  if(!val || Number(val) < 0){
+  if(!val || parseInt(val) < 0){
     currencyValue1.value = 0
+    ElMessage({
+      message: 'Значение должно бить больше 0',
+      type: 'warning',
+    })
   } else if(!(/^\d+$/.test(val))){
-    currencyValue1.value = parseInt(val)
+    ElMessage({
+      message: 'Введите только цифры',
+      type: 'warning',
+    })
+    currencyValue1.value = parseInt(val) || 0
   } else {
     currencyValue1.value = parseInt(val)
   }
   currencyValue2.value =  (currencyValue1.value / correlationCurrency.value).toFixed(2)
 }
 function changeCurrency2(val){
-  if(!val || Number(val) < 0){
+  if(!val || parseInt(val) < 0){
     currencyValue2.value = 0
+    ElMessage({
+      message: 'Значение должно бить больше 0',
+      type: 'warning',
+    })
   } else if(!(/^\d+$/.test(val))){
-    currencyValue2.value = parseInt(val)
+    ElMessage({
+      message: 'Введите только цифры',
+      type: 'warning',
+    })
+    currencyValue2.value = parseInt(val) || 0
   } else {
     currencyValue2.value = parseInt(val)
   }
