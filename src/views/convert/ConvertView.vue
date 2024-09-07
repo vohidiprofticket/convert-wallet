@@ -1,73 +1,77 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {useConvertStore} from "../../stores/convert.js";
 import {ElMessage} from "element-plus";
 const convert = useConvertStore()
 const correlationCurrency = ref(1)
-const currencyValue1 = ref(1)
-const currencyValue2 = ref(1)
-const currencyName1 = ref('RUB')
-const currencyName2 = ref('USD')
-
-watch(currencyName1, (newval, oldval) => {
-  if(currencyName2.value.toLowerCase() === newval.toLowerCase()){
-    currencyName2.value = oldval.toUpperCase()
-  }
-  correlationCurrency.value = convert.currencyWalletsFromServer[currencyName1.value.toLowerCase()+'-'+currencyName2.value.toLowerCase()]
-  currencyValue1.value =   (currencyValue2.value / correlationCurrency.value).toFixed(2)
+const firstCurrency = reactive({
+  quantity:1,
+  name:""
 })
-watch(currencyName2, (newval, oldval) => {
-  if(currencyName1.value.toLowerCase()  === newval.toLowerCase() ){
-    currencyName1.value = oldval.toUpperCase()
+const secondCurrency = reactive({
+  quantity:1,
+  name:""
+})
+
+watch(() => firstCurrency.name, (newVal, oldVal) => {
+  if(secondCurrency.name.toLowerCase() === firstCurrency.name.toLowerCase()){
+    secondCurrency.name = oldVal.toUpperCase()
   }
-  correlationCurrency.value = convert.currencyWalletsFromServer[currencyName1.value.toLowerCase()+'-'+currencyName2.value.toLowerCase()]
-  currencyValue2.value =  (currencyValue1.value * correlationCurrency.value).toFixed(2)
+  correlationCurrency.value = convert.currencyWalletsFromServer[firstCurrency.name.toLowerCase() + '-' + secondCurrency.name.toLowerCase()]
+  firstCurrency.quantity = (secondCurrency.quantity / correlationCurrency.value).toFixed(2)
+})
+watch(() => secondCurrency.name, (newVal, oldVal) => {
+  if(firstCurrency.name.toLowerCase()  === newVal.toLowerCase() ){
+    firstCurrency.name = oldVal.toUpperCase()
+  }
+  correlationCurrency.value = convert.currencyWalletsFromServer[firstCurrency.name.toLowerCase() + '-' + secondCurrency.name.toLowerCase()]
+  secondCurrency.quantity = (firstCurrency.quantity * correlationCurrency.value).toFixed(2)
 })
 function changeCurrency1(val){
   if(!val || parseInt(val) < 0){
-    currencyValue1.value = 0
+    firstCurrency.quantity = 0
     ElMessage({
       message: 'Значение должно бить больше 0',
       type: 'warning',
     })
-  } else if(!(/^\d+$/.test(val))){
+  }else if(!(/^\d+$/.test(val))){
     ElMessage({
       message: 'Введите только цифры',
       type: 'warning',
     })
-    currencyValue1.value = parseInt(val) || 0
+    firstCurrency.quantity = parseInt(val) || 0
   } else {
-    currencyValue1.value = parseInt(val)
+    firstCurrency.quantity = parseInt(val)
   }
-  currencyValue2.value =  (currencyValue1.value / correlationCurrency.value).toFixed(2)
+  secondCurrency.quantity =  (firstCurrency.quantity / correlationCurrency.value).toFixed(2)
 }
 function changeCurrency2(val){
   if(!val || parseInt(val) < 0){
-    currencyValue2.value = 0
+    secondCurrency.quantity = 0
     ElMessage({
       message: 'Значение должно бить больше 0',
       type: 'warning',
     })
-  } else if(!(/^\d+$/.test(val))){
+  }else if(!(/^\d+$/.test(val))){
     ElMessage({
       message: 'Введите только цифры',
       type: 'warning',
     })
-    currencyValue2.value = parseInt(val) || 0
+    secondCurrency.quantity = parseInt(val) || 0
   } else {
-    currencyValue2.value = parseInt(val)
+    secondCurrency.quantity = parseInt(val)
   }
-  currencyValue1.value = (currencyValue2.value * correlationCurrency.value).toFixed(2)
+  firstCurrency.quantity = (secondCurrency.quantity * correlationCurrency.value).toFixed(2)
 }
-
+// устанавливает выбранную из списка валюту по умолчанию
 function setCurrency(){
-  setTimeout(()=>{
-    const currency = convert.currencyWallets[0]
-    currencyName1.value = currency.currency1.toUpperCase()
-    currencyName2.value = currency.currency2.toUpperCase()
-    correlationCurrency.value = currency.exchageValue
-    currencyValue1.value = (currencyValue2.value * correlationCurrency.value).toFixed(2)
-  }, 300)
+  setTimeout(() => {
+    const thisCurrency = convert.currencyWallets[0]
+    firstCurrency.name = thisCurrency.currency1.toUpperCase()
+    secondCurrency.name = thisCurrency.currency2.toUpperCase()
+    correlationCurrency.value = thisCurrency.exchageValue
+    firstCurrency.quantity = (secondCurrency.quantity * correlationCurrency.value).toFixed(2)
+  }, 100)
 }
 onMounted(async () => {
   await setCurrency()
@@ -81,13 +85,13 @@ onMounted(async () => {
     <div class="converter-wrapper">
       <div class="converter-item">
         <el-input
-            v-model="currencyValue1"
+            v-model="firstCurrency.quantity"
             @input="changeCurrency1"
             style="width: 240px"
             size="large"
         />
         <el-select
-            v-model="currencyName1"
+            v-model="firstCurrency.name"
             placeholder="Выберите валюту"
             size="large"
             style="width: 240px"
@@ -102,13 +106,13 @@ onMounted(async () => {
       </div>
       <div class="converter-item">
         <el-input
-            v-model="currencyValue2"
+            v-model="secondCurrency.quantity"
             @input="changeCurrency2"
             style="width: 240px"
             size="large"
         />
         <el-select
-            v-model="currencyName2"
+            v-model="secondCurrency.name"
             placeholder="Выберите валюту"
             size="large"
             style="width: 240px"
