@@ -1,21 +1,14 @@
 <script setup>
-import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from "vue-router";
 import {useConvertStore} from "../stores/convert.js";
 import ConvertComponent from "../components/ConvertComponent.vue";
-const currentRoute = ref('/')
 const router = useRouter()
 const route = useRoute()
 const convert = useConvertStore()
 async function handleClickMenu(pageName){
   await router.push({name: pageName})
-  convert.currentRoute = route.name
 }
-onMounted(()=>{
-  setTimeout(()=>{
-    convert.currentRoute = route.name
-  },100)
-})
+
 </script>
 
 <template>
@@ -25,14 +18,14 @@ onMounted(()=>{
         <div
             @click="handleClickMenu('home')"
             class="menu-item"
-            :class="{'active' : convert.currentRoute === 'home'}"
+            :class="{'active' : route.name === 'home'}"
         >
           Главная
         </div>
         <div
             @click="handleClickMenu('convert')"
             class="menu-item"
-            :class="{'active' : convert.currentRoute === 'convert'}"
+            :class="{'active' : route.name === 'convert'}"
         >
           Конвертация
         </div>

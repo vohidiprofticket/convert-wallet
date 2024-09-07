@@ -1,9 +1,7 @@
 import {defineStore} from "pinia";
-import {useRestStore} from "../stores/rest.js";
 
 export const useConvertStore = defineStore('convertStore',{
     state:()=>({
-        currentRoute:'home',
         currentWallet:"RUB",
         permittesCurrency:['rub', 'usd', 'eur'],
         currencyWalletsFromServer:{},
@@ -21,19 +19,12 @@ export const useConvertStore = defineStore('convertStore',{
                     })
                 }
             })
-            console.log('wallets getter',arr)
             return arr
         },
     },
     actions:{
         selectWallet(wallet){
             this.currentWallet = wallet
-        },
-        async getCurrencyWallets(){
-            const rest = useRestStore()
-            const res = await rest.axios.get(`https://status.neuralgeneration.com/api/currency`)
-            this.currencyWalletsFromServer = {...res.data}
-            console.log('getCurrencyWallets',res.data, this.currencyWalletsFromServer)
         },
     }
 })

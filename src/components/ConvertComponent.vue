@@ -1,10 +1,12 @@
 <script setup>
 import {useConvertStore} from "../stores/convert.js";
 import {onMounted} from "vue";
+import {useApiStore} from "../stores/api.js";
 
 const convert = useConvertStore()
+const api = useApiStore()
 onMounted( async () => {
-  await convert.getCurrencyWallets()
+  await api.getCurrencyWallets()
 })
 </script>
 
